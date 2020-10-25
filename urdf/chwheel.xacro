@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:include filename="$(find tricycle)/urdf/common.xacro" />
+    <!-- 定义质量 -->
+    <xacro:property name="wheel_bar_mass" value="0.01"/>
+    <xacro:property name="wheel_frame_mass" value="0.445"/>
+
+    <!-- 定义尺寸 -->
+    <xacro:property name="r_wheel" value="${0.127/2}"/>
+    <xacro:property name="l_wheel" value="0.039"/>
+    <xacro:property name="r_bar2wheel" value="${0.020*2.5}"/>
+    <xacro:property name="r_bar" value="${r_wheel/12}"/>
+    <xacro:property name="l_bar" value="${r_bar*2}"/>
+
+
+    <!-- 定义惯量 -->
+    <!-- 定义mesh文件 -->
+    <xacro:property name="bar_mesh_file" value="$(find tricycle)/meshes/bar.stl"/>
+    <xacro:property name="wheelframe_mesh_file" value="$(find tricycle)/meshes/wheel_frame.stl"/>
+
+    <!-- 定义滚轮和轮框的几何关系 -->
+    <xacro:property name="up_height" value="${0.02098*2.5}"/>
+    <xacro:property name="low_height" value="${0.01028*2.5}"/>
+
+    <!-- 定义滚轮生成宏 -->
+    <xacro:macro name="wheel_bar_macro" params="parent suffix *origin">
+        <!-- for bar link -->
+        <link name="${parent}/bar_${suffix}">
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="${wheel_bar_mass}"/>
+                <xacro:cylinder_inertia r="${r_bar}" l="${l_bar}" mass="${wheel_bar_mass}"/>
+            </inertial>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${bar_mesh_file}" scale="2.5 2.5 2.5" />
+                </geometry>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${bar_mesh_file}" scale="2.6 2.6 2.6" />
+                </geometry>
+            </collision>
+        </link>
+        <joint name="${parent}/bar_joint_${suffix}" type="continuous">
+            <xacro:insert_block name="origin" />
+            <parent link="${parent}" />
+            <child link="${parent}/bar_${suffix}" />
+            <axis xyz="0 0 1" />
+        </joint>
+        <gazebo reference="${parent}/bar_${suffix}">
+            <mu1>50</mu1>
+            <mu2>50</mu2>
+            <material>Gazebo/Black</material>
+            <gravity>true</gravity>
+            <minDepth>0.0005 </minDepth>
+        </gazebo>
+    </xacro:macro>
+    <xacro:macro name="wheel_bar_instance" params="parent isup n ">
+        <xacro:if value="${isup}">
+            <xacro:wheel_bar_macro parent="${parent}" suffix="${n}" >
+                <origin xyz="${r_bar2wheel*cos(pi/3*n)} ${r_bar2wheel*sin(pi/3*n)} ${up_height}" rpy="${pi/2} 0 ${pi/3*n}" />
+            </xacro:wheel_bar_macro>
+        </xacro:if>
+        <xacro:if value="${isup}">
+            <xacro:wheel_bar_macro parent="${parent}" suffix="${6+n}" >
+                <origin xyz="${r_bar2wheel*cos(pi/3*n+pi/6)} ${r_bar2wheel*sin(pi/3*n+pi/6)} ${low_height}" rpy="${pi/2} 0 ${pi/3*n+pi/6}" />
+            </xacro:wheel_bar_macro>
+        </xacro:if>
+    </xacro:macro>
+
+    <!-- 定义轮子传动宏 -->
+    <xacro:macro name="wheel_transmission_macro" params="name joint actuator">
+        <transmission name="${name}">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${joint}">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${actuator}">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <!-- 定义轮子生成宏 -->
+    <xacro:macro name="chwheel_macro" params="name suffix parent *origin">
+        <!-- for base_wheel joint -->
+        <joint name="base_${name}_${suffix}_joint" type="continuous">
+            <parent link="${parent}" />
+            <child link="${name}_${suffix}" />
+            <xacro:insert_block name="origin"/>
+            <axis xyz="0 0 1" />
+            <dynamics damping="0.1" friction="0.01" />
+        </joint>
+        <link name="${name}_${suffix}">
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="${wheel_frame_mass}" />  <!-- [kg] -->
+                <xacro:cylinder_inertia r="${r_wheel}" l="${l_wheel}" mass="${wheel_frame_mass}"/>
+            </inertial>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${wheelframe_mesh_file}" scale="2.5 2.5 2.5" />
+                </geometry>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="${wheelframe_mesh_file}" scale="2.5 2.5 2.5" />
+                </geometry>
+            </collision>
+        </link>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="true" n="0"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="true" n="1"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="true" n="2"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="true" n="3"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="true" n="4"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="true" n="5"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="false" n="0"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="false" n="1"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="false" n="2"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="false" n="3"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="false" n="4"/>
+        <xacro:wheel_bar_instance parent="${name}_${suffix}" isup="false" n="5"/>
+
+<!--        <gazebo reference="${name}_${suffix}" maxContacts="100" laserRetro="0" selfCollide="false"/>-->
+        <xacro:wheel_transmission_macro name="wheel_trans_${suffix}" joint="base_${name}_${suffix}_joint" actuator="wheel_act_${suffix}"  />
+    </xacro:macro>
+</robot>
+
+

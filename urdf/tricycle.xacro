@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<robot name="tricycle" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:property name="robot_namespace" value="tricycle"/>
+    <xacro:include filename="$(find tricycle)/urdf/chwheel.xacro" />
+    <xacro:property name="chassis_offset" value="0.2"/>
+    <!-- 定义底盘尺寸 -->
+    <xacro:property name="chassis_length" value="0.4"/>
+    <xacro:property name="chassis_width" value="0.4"/>
+    <xacro:property name="chassis_height" value="0.05"/>
+    <xacro:property name="chassis_mass" value="5"/>
+    <!-- 定义底盘和轮子关系 -->
+    <xacro:property name="r_chssis_wheel" value="${chassis_length*sqrt(2)/2}"/>
+    <xacro:property name="height_chassis_wheel" value="-${chassis_height}"/>
+
+    <xacro:macro name="wheel_2_chassis_origin_macro" params="n">
+        <origin xyz="${r_chssis_wheel*cos(pi/3*n*2)} ${r_chssis_wheel*sin(pi/3*n*2)} ${chassis_offset}"
+                rpy="${pi/2} 0 ${pi/3*n*2+pi/2}" />
+    </xacro:macro>
+
+    <link name="world"/>
+    <joint name="fixed" type="floating">
+        <parent link="world"/>
+        <child link="base_link"/>
+    </joint>
+
+
+    <link name="base_link">
+        <inertial>
+            <origin xyz="0 0 ${chassis_offset}" rpy="0 0 0"/>
+            <mass value="${chassis_mass}"/>
+            <xacro:box_inertia x="${chassis_length}" y="${chassis_width}" z="${chassis_height}" mass="${chassis_mass}"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 ${chassis_offset}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 ${chassis_offset}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}" />
+            </geometry>
+        </collision>
+    </link>
+
+
+    <xacro:chwheel_macro name="wheel" suffix="0" parent="base_link">
+        <xacro:wheel_2_chassis_origin_macro n="0"/>
+    </xacro:chwheel_macro>
+    <xacro:chwheel_macro name="wheel" suffix="1" parent="base_link">
+        <xacro:wheel_2_chassis_origin_macro n="1"/>
+    </xacro:chwheel_macro>
+    <xacro:chwheel_macro name="wheel" suffix="2" parent="base_link">
+        <xacro:wheel_2_chassis_origin_macro n="2"/>
+    </xacro:chwheel_macro>
+
+
+    <gazebo reference="base_link" maxContacts="10" laserRetro="0" selfCollide="false"/>
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/tricycle</robotNamespace>
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        </plugin>
+    </gazebo>
+</robot>

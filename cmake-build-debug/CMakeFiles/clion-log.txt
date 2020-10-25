@@ -1,0 +1,27 @@
+/home/ou/software/clion/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/ou/workspace/ros_ws/src/tricycle
+-- Using CATKIN_DEVEL_PREFIX: /home/ou/workspace/ros_ws/src/tricycle/cmake-build-debug/devel
+-- Using CMAKE_PREFIX_PATH: /home/ou/workspace/ros_ws/devel;/opt/ros/melodic
+-- This workspace overlays: /home/ou/workspace/ros_ws/devel;/opt/ros/melodic
+-- Found PythonInterp: /usr/bin/python2 (found suitable version "2.7.17", minimum required is "2") 
+-- Using PYTHON_EXECUTABLE: /usr/bin/python2
+-- Using Debian Python package layout
+-- Using empy: /usr/bin/empy
+-- Using CATKIN_ENABLE_TESTING: ON
+-- Call enable_testing()
+-- Using CATKIN_TEST_RESULTS_DIR: /home/ou/workspace/ros_ws/src/tricycle/cmake-build-debug/test_results
+-- Found gtest sources under '/usr/src/googletest': gtests will be built
+-- Found gmock sources under '/usr/src/googletest': gmock will be built
+-- Found PythonInterp: /usr/bin/python2 (found version "2.7.17") 
+-- Using Python nosetests: /usr/bin/nosetests-2.7
+-- catkin 0.7.28
+-- BUILD_SHARED_LIBS is on
+-- Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
+-- Sophus inc dir : /home/ou/software/Sophus;/usr/include/eigen3
+-- No preference for use of exported glog CMake configuration set, and no hints for include/library directories provided. Defaulting to preferring an installed/exported glog CMake configuration if available.
+-- Failed to find installed glog CMake configuration, searching for glog build directories exported with CMake.
+-- Failed to find an installed/exported CMake configuration for glog, will perform search for installed glog components.
+-- BUILD  dir :/home/ou/workspace/ros_ws/src/tricycle/cmake-build-debug
+-- SOURCE dir :/home/ou/workspace/ros_ws/src/tricycle
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ou/workspace/ros_ws/src/tricycle/cmake-build-debug
